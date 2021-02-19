@@ -1,0 +1,6 @@
+torch
+torchvision
+ipython
+matplotlib
+numpy
+torchsummary
