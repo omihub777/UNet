@@ -19,6 +19,7 @@ parser.add_argument("--in-c", default=3, type=int)
 parser.add_argument("--dry-run", action="store_true")
 parser.add_argument("--size", default=224, type=int)
 parser.add_argument("--seed", default=42, type=int)
+parser.add_argument("--loss",default="mse")
 args = parser.parse_args()
 
 args.out_c = 1
@@ -39,8 +40,9 @@ class Trainer:
         self.args = args  
         self.logger = logger
         self.model = get_model(args).to(self.device)
-        self.criterion = nn.BCEWithLogitsLoss()
+        self.criterion = nn.MSELoss() if self.args.loss == 'mse' else nn.BCEWithLogitsLoss()
         self.optimizer = get_optimizer(args, self.model)
+        print(f"Loss:{self.args.loss}")
 
     def fit(self, train_dl, test_dl):
         step = 0
@@ -52,11 +54,16 @@ class Trainer:
                 num_imgs += image.size(0)
                 loss = self.trian_step(self.model, image, target, step)
                 epoch_loss += loss
+                if self.args.dry_run:
+                    break
+            # grid_target = torchvision.utils.make_grid(target.cpu(), nrow=4)
+            # self.logger.log_image(grid_target.permute(1,2,0), step=step, name="Target") 
+            # import IPython; IPython.embed(); exit(1)
             epoch_loss /= num_imgs
             logger.log_metric("loss", epoch_loss, step=step)
             self.model.eval()
             for i, image in enumerate(test_dl):
-                if i>=1:
+                if i>=2:
                     break
                 self.test_step(self.model, image, step)
             
@@ -86,14 +93,19 @@ class Trainer:
         with torch.cuda.amp.autocast():
             out = self.model(image)
         grid_image = torchvision.utils.make_grid(image.cpu(), nrow=4)
-        grid_out = torchvision.utils.make_grid(out.detach().cpu(), nrow=4)
+        grid_softmask = torchvision.utils.make_grid(out.detach().cpu(), nrow=4)
+        grid_hardmask = torchvision.utils.make_grid(out.detach().cpu().clamp(0,1).round(), nrow=4)
         self.logger.log_image(grid_image.permute(1,2,0), step=step, name="Orig")
-        self.logger.log_image(grid_out.permute(1,2,0), step=step, name="SoftMask")
+        self.logger.log_image(grid_softmask.permute(1,2,0), step=step, name="SoftMask")
+        self.logger.log_image(grid_hardmask.permute(1,2,0), step=step, name="HardMask")
 
-        # result = out.clamp(0,1).round().expand_as(image) * image
-        result = out.expand_as(image)*image
-        grid_result = torchvision.utils.make_grid(result.detach().cpu(), nrow=4)
-        self.logger.log_image(grid_result.permute(1,2,0), step=step, name="Result")
+
+        softresult = out.expand_as(image)*image
+        hardresult = out.clamp(0,1).round().expand_as(image) * image
+        grid_softresult = torchvision.utils.make_grid(softresult.detach().cpu(), nrow=4)
+        grid_hardresult = torchvision.utils.make_grid(hardresult.detach().cpu(), nrow=4)
+        self.logger.log_image(grid_softresult.permute(1,2,0), step=step, name="SoftResult")
+        self.logger.log_image(grid_hardresult.permute(1,2,0), step=step, name="HardResult")
         # import IPython; IPython.embed(); exit(1)
 if __name__=="__main__":
     logger = comet_ml.Experiment(

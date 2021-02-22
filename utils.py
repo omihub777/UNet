@@ -19,6 +19,7 @@ def get_dataset(args):
     return train_ds, test_ds
 
 def get_model(args):
+    print(f"Model: {args.model_name}")
     if args.model_name=="unet":
         model = UNet(args.in_c, args.out_c)
     else:
@@ -26,6 +27,7 @@ def get_model(args):
     return model
 
 def get_optimizer(args, model):
+    print(f"Optimizer: {args.optimizer}")
     if args.optimizer=="adam":
         optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate, betas=(args.beta1, args.beta2))
     else:
@@ -35,6 +37,7 @@ def get_optimizer(args, model):
 def get_experiment_name(args):
     experiment_name = f"{args.model_name}"
 
+    print(f"Experiment: {experiment_name}")
     return experiment_name
 
 if __name__=="__main__":
