@@ -93,8 +93,8 @@ class Trainer:
         with torch.cuda.amp.autocast():
             out = self.model(image)
         grid_image = torchvision.utils.make_grid(image.cpu(), nrow=4)
-        grid_softmask = torchvision.utils.make_grid(out.detach().cpu(), nrow=4)
-        grid_hardmask = torchvision.utils.make_grid(out.clamp(0,1).round().detach().cpu(), nrow=4)
+        # grid_softmask = torchvision.utils.make_grid(out.detach().cpu(), nrow=4)
+        # grid_hardmask = torchvision.utils.make_grid(out.clamp(0,1).round().detach().cpu(), nrow=4)
         self.logger.log_image(grid_image.permute(1,2,0), step=step, name="Orig")
         # self.logger.log_image(grid_softmask.permute(1,2,0), step=step, name="SoftMask")
         # self.logger.log_image(grid_hardmask.permute(1,2,0), step=step, name="HardMask")
