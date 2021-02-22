@@ -90,7 +90,8 @@ class Trainer:
         self.logger.log_image(grid_image.permute(1,2,0), step=step, name="Orig")
         self.logger.log_image(grid_out.permute(1,2,0), step=step, name="SoftMask")
 
-        result = out.clamp(0,1).round().expand_as(image) * image
+        # result = out.clamp(0,1).round().expand_as(image) * image
+        result = out.expand_as(image)*image
         grid_result = torchvision.utils.make_grid(result.detach().cpu(), nrow=4)
         self.logger.log_image(grid_result.permute(1,2,0), step=step, name="Result")
         # import IPython; IPython.embed(); exit(1)
