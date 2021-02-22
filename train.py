@@ -56,9 +56,9 @@ class Trainer:
             logger.log_metric("loss", epoch_loss, step=step)
             self.model.eval()
             for i, image in enumerate(test_dl):
-                self.test_step(self.model, image, step)
-                if i>2:
+                if i>1:
                     break
+                self.test_step(self.model, image, step)
             
             if epoch%20 == 0:
                 filename=f"weights/{self.args.model_name}_ep{epoch}.pth"
