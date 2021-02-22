@@ -6,6 +6,12 @@ In this repo, we use `UNet` mainly.
 
 
 ## TODO
+* Add More DAs
+    * Rotation(45)
+    * Color Jitter(Brightness/Contreast/Saturation/Hue)
+    * Gaussian Blur?
+    
+* Double Check duplciation between train and test data.
 * test.py
 
 ## Done

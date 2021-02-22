@@ -37,6 +37,11 @@ class RealCropDataset(torch.utils.data.Dataset):
             image = transforms.functional.vflip(image)
             target = transforms.functional.vflip(target)
 
+        # Rotation(45)
+        # ColorJitter(Brightness/Contrast/Saturation/Hue)
+        # Gaussian Blur(for motion noise or some ill-setting)
+        
+
         image = transforms.functional.to_tensor(image)
         target = transforms.functional.to_tensor(target)
         # print(f"==============={target.max()}===================")
