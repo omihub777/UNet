@@ -99,6 +99,8 @@ if __name__=="__main__":
         api_key=args.api_key,
         project_name="auto-crop"
     )
+    experiment_name = get_experiment_name(args)
+    logger.set_name(experiment_name)
     train_dl, test_dl = get_dataloader(args)
     trainer = Trainer(args, logger)
     trainer.fit(train_dl, test_dl)

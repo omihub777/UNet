@@ -31,7 +31,12 @@ def get_optimizer(args, model):
     else:
         raise ValueError(f"{args.optimizer}?")
     return optimizer
-    
+
+def get_experiment_name(args):
+    experiment_name = f"{args.model_name}"
+
+    return experiment_name
+
 if __name__=="__main__":
     import argparse
     args = argparse.Namespace()
