@@ -1,4 +1,9 @@
 .vscode/
+*.ipynb
+data/*
+weights/*
+!weights/.gitkeep
+!data/.gitkeep
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

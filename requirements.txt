@@ -4,3 +4,5 @@ ipython
 matplotlib
 numpy
 torchsummary
+pillow
+comet_ml

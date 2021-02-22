@@ -13,15 +13,14 @@ class ConvBlock(nn.Module):
         return out
 
 class UpConvBlock(nn.Module):
-    def __init__(self, in_c, out_c, k=2, s=1, p=1, bias=False):
+    def __init__(self, in_c, out_c, k=2, s=2, p=0, bias=False):
         super(UpConvBlock, self).__init__()
-        self.upsample = nn.Upsample(scale_factor=2)
-        self.conv = nn.Conv2d(in_c, out_c, kernel_size=1, bias=bias)
+        self.conv = nn.ConvTranspose2d(in_c, out_c, kernel_size=k, stride=s, padding=p, bias=bias)
         self.bn = nn.BatchNorm2d(out_c)
 
     def forward(self, x):
         # Need bn & act?
-        out = F.relu(self.bn(self.conv(self.upsample(x))))
+        out = F.relu(self.bn(self.conv(x)))
         return out
 
 
