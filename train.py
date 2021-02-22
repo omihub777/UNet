@@ -56,7 +56,7 @@ class Trainer:
             logger.log_metric("loss", epoch_loss, step=step)
             self.model.eval()
             for i, image in enumerate(test_dl):
-                if i>1:
+                if i>=1:
                     break
                 self.test_step(self.model, image, step)
             
