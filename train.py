@@ -63,7 +63,7 @@ class Trainer:
             logger.log_metric("loss", epoch_loss, step=step)
             self.model.eval()
             for i, image in enumerate(test_dl):
-                if i>=2:
+                if i>=1:
                     break
                 self.test_step(self.model, image, step)
             
@@ -96,8 +96,8 @@ class Trainer:
         grid_softmask = torchvision.utils.make_grid(out.detach().cpu(), nrow=4)
         grid_hardmask = torchvision.utils.make_grid(out.clamp(0,1).round().detach().cpu(), nrow=4)
         self.logger.log_image(grid_image.permute(1,2,0), step=step, name="Orig")
-        self.logger.log_image(grid_softmask.permute(1,2,0), step=step, name="SoftMask")
-        self.logger.log_image(grid_hardmask.permute(1,2,0), step=step, name="HardMask")
+        # self.logger.log_image(grid_softmask.permute(1,2,0), step=step, name="SoftMask")
+        # self.logger.log_image(grid_hardmask.permute(1,2,0), step=step, name="HardMask")
 
 
         softresult = out.expand_as(image)*image

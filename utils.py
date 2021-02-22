@@ -8,7 +8,7 @@ from model.unet import UNet
 def get_dataloader(args):
     train_ds, test_ds = get_dataset(args)
     train_dl = torch.utils.data.DataLoader(train_ds, batch_size=args.batch_size, shuffle=True, num_workers=4, pin_memory=True)
-    test_dl = torch.utils.data.DataLoader(test_ds, batch_size=args.eval_batch_size, num_workers=4, pin_memory=True)
+    test_dl = torch.utils.data.DataLoader(test_ds, batch_size=args.eval_batch_size, shuffle=True, num_workers=4, pin_memory=True)
     return train_dl, test_dl
 
 def get_dataset(args):
