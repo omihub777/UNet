@@ -6,6 +6,7 @@ In this repo, we use `UNet` mainly.
 
 
 ## TODO
+* test.py
 
 ## Done
 * get_dataset
