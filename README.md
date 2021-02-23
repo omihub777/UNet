@@ -6,12 +6,15 @@ In this repo, we use `UNet` mainly.
 
 
 ## TODO
+* Double Check duplciation between train and test data.
 * Add More DAs
     * Rotation(45)
     * Color Jitter(Brightness/Contreast/Saturation/Hue)
     * Gaussian Blur?
-    
-* Double Check duplciation between train and test data.
+* BCE+Dice Loss(from [kaggle](https://www.kaggle.com/c/carvana-image-masking-challenge/discussion/40199))
+* Lessen the number of parameters([3rd place solution](https://www.kaggle.com/c/carvana-image-masking-challenge/discussion/40199) uses 8M UNet)
+* From ConvBlock to ResBlock in bottleneck.
+* Dilated Conv?
 * test.py
 
 ## Done

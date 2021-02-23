@@ -87,47 +87,48 @@ class VanillaUNet(nn.Module):
 class UNet(nn.Module):
     def __init__(self, in_c, out_c):
         super(UNet, self).__init__()
+        filters = 44
         self.enc1 = nn.Sequential(
-            ConvBlock(in_c, 64, p=1),
-            ConvBlock(64, 64, p=1),
+            ConvBlock(in_c, filters, p=1),
+            ConvBlock(filters, filters, p=1),
         )
         self.enc2 = nn.Sequential(
-            ConvBlock(64, 128, p=1),
-            ConvBlock(128, 128, p=1)
+            ConvBlock(filters, filters*2, p=1),
+            ConvBlock(filters*2, filters*2, p=1)
         )
         self.enc3 = nn.Sequential(
-            ConvBlock(128, 256, p=1),
-            ConvBlock(256, 256, p=1)
+            ConvBlock(filters*2, filters*4, p=1),
+            ConvBlock(filters*4, filters*4, p=1)
         )
         self.enc4 = nn.Sequential(
-            ConvBlock(256, 512, p=1),
-            ConvBlock(512, 512, p=1)
+            ConvBlock(filters*4, filters*8, p=1),
+            ConvBlock(filters*8, filters*8, p=1)
         )
         self.trans = nn.Sequential(
-            ConvBlock(512, 1024, p=1),
-            ConvBlock(1024, 1024, p=1),
+            ConvBlock(filters*8, filters*16, p=1),
+            ConvBlock(filters*16, filters*16, p=1),
         )
-        self.upconv1 = UpConvBlock(1024, 512)
+        self.upconv1 = UpConvBlock(filters*16, filters*8)
         self.dec1 = nn.Sequential(
-            ConvBlock(1024, 512, p=1),
-            ConvBlock(512, 512, p=1)
+            ConvBlock(filters*16, filters*8, p=1),
+            ConvBlock(filters*8, filters*8, p=1)
         )
-        self.upconv2 = UpConvBlock(512, 256)
+        self.upconv2 = UpConvBlock(filters*8, filters*4)
         self.dec2 = nn.Sequential(
-            ConvBlock(512, 256, p=1),
-            ConvBlock(256, 256, p=1)
+            ConvBlock(filters*8, filters*4, p=1),
+            ConvBlock(filters*4, filters*4, p=1)
         )
-        self.upconv3 = UpConvBlock(256, 128)
+        self.upconv3 = UpConvBlock(filters*4, filters*2)
         self.dec3 = nn.Sequential(
-            ConvBlock(256, 128, p=1),
-            ConvBlock(128, 128, p=1)
+            ConvBlock(filters*4, filters*2, p=1),
+            ConvBlock(filters*2, filters*2, p=1)
         )
-        self.upconv4 = UpConvBlock(128, 64)
+        self.upconv4 = UpConvBlock(filters*2, filters)
         self.dec4 = nn.Sequential(
-            ConvBlock(128, 64, p=1),
-            ConvBlock(64, 64, p=1)
+            ConvBlock(filters*2, filters, p=1),
+            ConvBlock(filters, filters, p=1)
         )
-        self.last = nn.Conv2d(64, out_c, kernel_size=1)
+        self.last = nn.Conv2d(filters, out_c, kernel_size=1)
 
     def forward(self, x):
         out1 = self.enc1(x)
