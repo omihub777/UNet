@@ -15,7 +15,7 @@ parser.add_argument("--model-name", default="unet")
 parser.add_argument("--lr", default=1e-3, type=float)
 parser.add_argument("--batch-size", default=16, type=int)
 parser.add_argument("--eval-batch-size",default=32, type=int)
-parser.add_argument("--max-steps", default=500, type=int)
+parser.add_argument("--max-steps", default=1000, type=int)
 parser.add_argument("--optimizer", default="adam")
 parser.add_argument("--learning-rate", default=1e-3, type=float)
 parser.add_argument("--beta1", default=0.9, type=float)
@@ -62,9 +62,12 @@ class Trainer:
                 loss = self.trian_step(self.model, image, target, step)
                 epoch_loss += loss
                 if self.args.dry_run:
+                    grid_image = torchvision.utils.make_grid(image.cpu(), nrow=4)
+                    self.logger.log_image(grid_image.permute(1,2,0), step=step, name="Image") 
+                    grid_target = torchvision.utils.make_grid(target.cpu(), nrow=4)
+                    self.logger.log_image(grid_target.permute(1,2,0), step=step, name="Target") 
                     break
-            # grid_target = torchvision.utils.make_grid(target.cpu(), nrow=4)
-            # self.logger.log_image(grid_target.permute(1,2,0), step=step, name="Target") 
+
             # import IPython; IPython.embed(); exit(1)
             epoch_loss /= num_imgs
             logger.log_metric("loss", epoch_loss, step=step)
@@ -113,18 +116,19 @@ class Trainer:
         grid_hardresult = torchvision.utils.make_grid(hardresult.detach().cpu(), nrow=4)
         self.logger.log_image(grid_softresult.permute(1,2,0), step=step, name="SoftResult")
         self.logger.log_image(grid_hardresult.permute(1,2,0), step=step, name="HardResult")
-        # import IPython; IPython.embed(); exit(1)
 if __name__=="__main__":
     logger = comet_ml.Experiment(
         api_key=args.api_key,
         project_name="auto-crop"
     )
+    args.api_key = None
     experiment_name = get_experiment_name(args)
     logger.set_name(experiment_name)
     train_dl, test_dl = get_dataloader(args)
     epoch_steps = math.floor(len(train_dl.dataset) / args.batch_size)
     args.max_epochs = math.floor(args.max_steps/epoch_steps)
     trainer = Trainer(args, logger)
+    logger.log_parameters(vars(args))
     trainer.fit(train_dl, test_dl)
     filename=f"weights/{args.model_name}_last.pth"
     torch.save(trainer.model.state_dict(), f=filename)

@@ -150,6 +150,71 @@ class UNet(nn.Module):
         return out
 
 
+class ResUNet(nn.Module):
+    def __init__(self, in_c: int, out_c: int , filters: int=44):
+        super(ResUNet, self).__init__()
+        self.enc1 = nn.Sequential(
+            ConvBlock(in_c, filters, p=1),
+            ConvBlock(filters, filters, p=1),
+        )
+        self.enc2 = nn.Sequential(
+            ConvBlock(filters, filters*2, p=1),
+            ConvBlock(filters*2, filters*2, p=1)
+        )
+        self.enc3 = nn.Sequential(
+            ConvBlock(filters*2, filters*4, p=1),
+            ConvBlock(filters*4, filters*4, p=1)
+        )
+        self.enc4 = nn.Sequential(
+            ConvBlock(filters*4, filters*8, p=1),
+            ConvBlock(filters*8, filters*8, p=1)
+        )
+        self.trans = nn.Sequential(
+            ConvBlock(filters*8, filters*16, p=1),
+            ConvBlock(filters*16, filters*16, p=1),
+        )
+        self.upconv1 = UpConvBlock(filters*16, filters*8)
+        self.dec1 = nn.Sequential(
+            ConvBlock(filters*16, filters*8, p=1),
+            ConvBlock(filters*8, filters*8, p=1)
+        )
+        self.upconv2 = UpConvBlock(filters*8, filters*4)
+        self.dec2 = nn.Sequential(
+            ConvBlock(filters*8, filters*4, p=1),
+            ConvBlock(filters*4, filters*4, p=1)
+        )
+        self.upconv3 = UpConvBlock(filters*4, filters*2)
+        self.dec3 = nn.Sequential(
+            ConvBlock(filters*4, filters*2, p=1),
+            ConvBlock(filters*2, filters*2, p=1)
+        )
+        self.upconv4 = UpConvBlock(filters*2, filters)
+        self.dec4 = nn.Sequential(
+            ConvBlock(filters*2, filters, p=1),
+            ConvBlock(filters, filters, p=1)
+        )
+        self.last = nn.Conv2d(filters, out_c, kernel_size=1)
+
+    def forward(self, x):
+        out1 = self.enc1(x)
+        out2 = self.enc2(F.max_pool2d(out1, 2))
+        out3 = self.enc3(F.max_pool2d(out2, 2)) 
+        out4 = self.enc4(F.max_pool2d(out3, 2))
+
+        out = self.trans(F.max_pool2d(out4, 2))
+
+        out = self.upconv1(out)
+        out = self.dec1(torch.cat([out4, out], dim=1))
+        out = self.upconv2(out)
+        out = self.dec2(torch.cat([out3, out], dim=1))
+        out = self.upconv3(out)
+        out = self.dec3(torch.cat([out2, out], dim=1))
+        out = self.upconv4(out)
+        out = self.dec4(torch.cat([out1, out], dim=1))
+        out = self.last(out)
+        return out
+
+
 if __name__=="__main__":
     b, c, h, w = 2,1,224,224
     x = torch.randn(b, c, h, w)
