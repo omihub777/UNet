@@ -3,9 +3,11 @@ import argparse
 from utils import *
 import torch
 import torch.nn as nn
+import numpy as np
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--api-key", required=True)
+
 parser.add_argument("--model-name", default="unet")
 parser.add_argument("--lr", default=1e-3, type=float)
 parser.add_argument("--batch-size", default=16, type=int)
@@ -26,6 +28,7 @@ args = parser.parse_args()
 args.out_c = 1
 torch.backends.cudnn.benchmark=True
 torch.manual_seed(args.seed)
+np.random.seed(args.seed)
 
 if args.dry_run:
     print("=====DRY RUN=====")
