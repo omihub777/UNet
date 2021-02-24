@@ -21,8 +21,8 @@ parser.add_argument("--in-c", default=3, type=int)
 parser.add_argument("--dry-run", action="store_true")
 parser.add_argument("--size", default=224, type=int)
 parser.add_argument("--seed", default=42, type=int)
-parser.add_argument("--loss",default="mse", help="mse, bce, dice")
-parser.add_argument("--dice-wegiht", default=1., type=float)
+parser.add_argument("--loss",default="dice", help="mse, bce, dice")
+parser.add_argument("--dice-weight", default=1., type=float)
 args = parser.parse_args()
 
 args.out_c = 1
@@ -46,7 +46,6 @@ class Trainer:
         self.model = get_model(args).to(self.device)
         self.criterion = get_criterion(args)
         self.optimizer = get_optimizer(args, self.model)
-        print(f"Loss:{self.args.loss}")
 
     def fit(self, train_dl, test_dl):
         step = 0
