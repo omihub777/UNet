@@ -1,9 +1,23 @@
 import torch
+import torch.nn as nn
 import torchvision
 import torchvision.transforms as transforms
 import glob
 from dataset import RealCropDataset
 from model.unet import UNet
+from criterions import DiceBCELoss
+
+def get_criterion(args):
+    print(f"Loss: {args.loss}")
+    if args.loss=="mse":
+        criterion = nn.MSELoss()
+    elif args.loss=="bce":
+        criterion = nn.BCEWithLogitsLoss()
+    elif args.loss=="dice":
+        criterion = DiceBCELoss(weight=args.dice_weight)
+    else:
+        raise ValueError(f"{args.loss}?")
+    return criterion
 
 def get_dataloader(args):
     train_ds, test_ds = get_dataset(args)
@@ -35,7 +49,7 @@ def get_optimizer(args, model):
     return optimizer
 
 def get_experiment_name(args):
-    experiment_name = f"{args.model_name}"
+    experiment_name = f"{args.model_name}_{args.loss}"
 
     print(f"Experiment: {experiment_name}")
     return experiment_name
