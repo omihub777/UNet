@@ -3,6 +3,7 @@ import torchvision
 import torchvision.transforms as transforms
 import torchvision.transforms.functional as TF
 from PIL import Image
+import numpy as np
 
 class RealCropDataset(torch.utils.data.Dataset):
     def __init__(self, img_path, train=True, size=224):
@@ -38,14 +39,15 @@ class RealCropDataset(torch.utils.data.Dataset):
             image = TF.vflip(image)
             target = TF.vflip(target)
 
-        # Rotation(45)
-        angle = torch.randint(-45, 45,size=(1))
+        # Rotation
+        angle = np.random.randint(low=-45, hight=45)
         image = TF.rotate(image, angle)
         target = TF.rotate(target, angle)
         
         # ColorJitter(Brightness/Contrast/Saturation/Hue)
         # Only for image!
         image = transforms.ColorJitter(brightness=.2, contrast=.2, saturation=.2, hue=.1)(image)
+
         # Gaussian Blur(for motion noise or some ill-setting)
         # Only for image!
         image = transforms.GaussianBlur(kernel_size=3)(image)
@@ -54,7 +56,7 @@ class RealCropDataset(torch.utils.data.Dataset):
         image = TF.to_tensor(image)
         target = TF.to_tensor(target)
 
-        # Normalize image.
+        # Normalize image
         image = TF.normalize(image, mean=[.5,.5,.5], std=[.5,.5,.5])
 
         return image, target
