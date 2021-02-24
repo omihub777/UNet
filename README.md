@@ -6,12 +6,13 @@ In this repo, we use `UNet` mainly.
 
 
 ## TODO
-* From ConvBlock to ResBlock (in bottleneck.)
-    * Ref:[DeepResUNet](https://arxiv.org/abs/1711.10684)
-        * Use pre-act resblock for all blocks.(not only bottleneck)
+* Tackle with "Shaded White removing problem"
+    * Can't identify shaded white parts of items.
+    * Higher Brightness degree?
 * Quantitative Evaluation.(IoU)
 * Dilated Conv?
 * test.py
+* Add Random Grayscale to catch the shape of the objects
 
 ## Done
 * get_dataset
@@ -34,3 +35,6 @@ In this repo, we use `UNet` mainly.
     * Rotation(45)
     * Color Jitter(Brightness/Contreast/Saturation/Hue)
     * Gaussian Blur?
+* From ConvBlock to ResBlock (in bottleneck.)
+    * Ref:[DeepResUNet](https://arxiv.org/abs/1711.10684)
+        * Use pre-act resblock for all blocks.(not only bottleneck)

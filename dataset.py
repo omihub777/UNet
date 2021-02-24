@@ -30,12 +30,12 @@ class RealCropDataset(torch.utils.data.Dataset):
         target = TF.crop(target, i, j, h, w)
 
         #HFlip
-        if torch.rand(1) > 0.5:
+        if np.random.random(1) > 0.5:
             image = TF.hflip(image)
             target = TF.hflip(target)
 
         #VFlip
-        if torch.rand(1) > 0.5:
+        if np.random.random(1) > 0.5:
             image = TF.vflip(image)
             target = TF.vflip(target)
 
@@ -44,14 +44,20 @@ class RealCropDataset(torch.utils.data.Dataset):
         image = TF.rotate(image, angle)
         target = TF.rotate(target, angle)
         
+        # ====Only for image!====
         # ColorJitter(Brightness/Contrast/Saturation/Hue)
-        # Only for image!
         image = transforms.ColorJitter(brightness=.2, contrast=.2, saturation=.2, hue=.1)(image)
 
+        # GrayScale
+        if np.random.random(1) > 0.3:
+            image = TF.to_grayscale(image, num_output_channels=3)
+
         # Gaussian Blur(for motion noise or some ill-setting)
-        # Only for image!
         # image = transforms.GaussianBlur(kernel_size=3)(image)
-        
+    
+        # ====Up to here!====
+
+
         # Convert to torch.Tensor
         image = TF.to_tensor(image)
         target = TF.to_tensor(target)
