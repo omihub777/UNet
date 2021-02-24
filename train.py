@@ -24,9 +24,9 @@ parser.add_argument("--in-c", default=3, type=int)
 parser.add_argument("--dry-run", action="store_true")
 parser.add_argument("--size", default=224, type=int)
 parser.add_argument("--seed", default=42, type=int)
-parser.add_argument("--loss",default="dice", help="mse, bce, dice")
+parser.add_argument("--loss",default="bce", help="mse, bce, dice")
 parser.add_argument("--dice-weight", default=1., type=float)
-parser.add_argument("--filters", defualt=44, type=int, help="Number of filters in the inital layer.")
+parser.add_argument("--filters", default=44, type=int, help="Number of filters in the inital layer.")
 args = parser.parse_args()
 
 args.out_c = 1
