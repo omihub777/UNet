@@ -40,7 +40,7 @@ class RealCropDataset(torch.utils.data.Dataset):
             target = TF.vflip(target)
 
         # Rotation
-        angle = np.random.randint(low=-45, hight=45)
+        angle = np.random.randint(low=-45, high=45)
         image = TF.rotate(image, angle)
         target = TF.rotate(target, angle)
         
