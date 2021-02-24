@@ -50,7 +50,7 @@ class RealCropDataset(torch.utils.data.Dataset):
 
         # Gaussian Blur(for motion noise or some ill-setting)
         # Only for image!
-        image = transforms.GaussianBlur(kernel_size=3)(image)
+        # image = transforms.GaussianBlur(kernel_size=3)(image)
         
         # Convert to torch.Tensor
         image = TF.to_tensor(image)

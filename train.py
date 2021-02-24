@@ -11,7 +11,7 @@ from utils import *
 parser = argparse.ArgumentParser()
 parser.add_argument("--api-key", required=True)
 
-parser.add_argument("--model-name", default="unet")
+parser.add_argument("--model-name", default="unet", help="unet, resunet")
 parser.add_argument("--lr", default=1e-3, type=float)
 parser.add_argument("--batch-size", default=16, type=int)
 parser.add_argument("--eval-batch-size",default=32, type=int)
@@ -63,9 +63,9 @@ class Trainer:
                 epoch_loss += loss
                 if self.args.dry_run:
                     grid_image = torchvision.utils.make_grid(image.cpu(), nrow=4)
-                    self.logger.log_image(grid_image.permute(1,2,0), step=step, name="Image") 
+                    self.logger.log_image(grid_image.permute(1,2,0), step=step, name="Train") 
                     grid_target = torchvision.utils.make_grid(target.cpu(), nrow=4)
-                    self.logger.log_image(grid_target.permute(1,2,0), step=step, name="Target") 
+                    self.logger.log_image(grid_target.permute(1,2,0), step=step, name="TrainTarget") 
                     break
 
             # import IPython; IPython.embed(); exit(1)
@@ -105,7 +105,7 @@ class Trainer:
         grid_image = torchvision.utils.make_grid(image.cpu(), nrow=4)
         # grid_softmask = torchvision.utils.make_grid(out.detach().cpu(), nrow=4)
         # grid_hardmask = torchvision.utils.make_grid(out.clamp(0,1).round().detach().cpu(), nrow=4)
-        self.logger.log_image(grid_image.permute(1,2,0), step=step, name="Orig")
+        self.logger.log_image(grid_image.permute(1,2,0), step=step, name="Test")
         # self.logger.log_image(grid_softmask.permute(1,2,0), step=step, name="SoftMask")
         # self.logger.log_image(grid_hardmask.permute(1,2,0), step=step, name="HardMask")
 

@@ -6,7 +6,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torchsummary
 
-from layers import ConvBlock, UpConvBlock
+from layers import ConvBlock, UpConvBlock, ResBlock
 
 class VanillaUNet(nn.Module):
     """Different input/output size"""
@@ -151,57 +151,38 @@ class UNet(nn.Module):
 
 
 class ResUNet(nn.Module):
+    """Residual-modified UNet. Note that we don't use a residual block in the inital block.
+    This is because the architecture of ResNet dosen't use residual block in the very first layer either.
+    """
     def __init__(self, in_c: int, out_c: int , filters: int=44):
         super(ResUNet, self).__init__()
         self.enc1 = nn.Sequential(
             ConvBlock(in_c, filters, p=1),
             ConvBlock(filters, filters, p=1),
         )
-        self.enc2 = nn.Sequential(
-            ConvBlock(filters, filters*2, p=1),
-            ConvBlock(filters*2, filters*2, p=1)
-        )
-        self.enc3 = nn.Sequential(
-            ConvBlock(filters*2, filters*4, p=1),
-            ConvBlock(filters*4, filters*4, p=1)
-        )
-        self.enc4 = nn.Sequential(
-            ConvBlock(filters*4, filters*8, p=1),
-            ConvBlock(filters*8, filters*8, p=1)
-        )
-        self.trans = nn.Sequential(
-            ConvBlock(filters*8, filters*16, p=1),
-            ConvBlock(filters*16, filters*16, p=1),
-        )
+        self.enc2 = ResBlock(filters, filters*2)
+        self.enc3 = ResBlock(filters*2, filters*4)
+        self.enc4 = ResBlock(filters*4, filters*8)
+
+        self.trans = ResBlock(filters*8, filters*16)
+
         self.upconv1 = UpConvBlock(filters*16, filters*8)
-        self.dec1 = nn.Sequential(
-            ConvBlock(filters*16, filters*8, p=1),
-            ConvBlock(filters*8, filters*8, p=1)
-        )
+        self.dec1 = ResBlock(filters*16, filters*8, s=1)
         self.upconv2 = UpConvBlock(filters*8, filters*4)
-        self.dec2 = nn.Sequential(
-            ConvBlock(filters*8, filters*4, p=1),
-            ConvBlock(filters*4, filters*4, p=1)
-        )
+        self.dec2 = ResBlock(filters*8, filters*4, s=1)
         self.upconv3 = UpConvBlock(filters*4, filters*2)
-        self.dec3 = nn.Sequential(
-            ConvBlock(filters*4, filters*2, p=1),
-            ConvBlock(filters*2, filters*2, p=1)
-        )
+        self.dec3 = ResBlock(filters*4, filters*2, s=1)
         self.upconv4 = UpConvBlock(filters*2, filters)
-        self.dec4 = nn.Sequential(
-            ConvBlock(filters*2, filters, p=1),
-            ConvBlock(filters, filters, p=1)
-        )
+        self.dec4 = ResBlock(filters*2, filters, s=1)
         self.last = nn.Conv2d(filters, out_c, kernel_size=1)
 
     def forward(self, x):
         out1 = self.enc1(x)
-        out2 = self.enc2(F.max_pool2d(out1, 2))
-        out3 = self.enc3(F.max_pool2d(out2, 2)) 
-        out4 = self.enc4(F.max_pool2d(out3, 2))
+        out2 = self.enc2(out1)
+        out3 = self.enc3(out2) 
+        out4 = self.enc4(out3)
 
-        out = self.trans(F.max_pool2d(out4, 2))
+        out = self.trans(out4)
 
         out = self.upconv1(out)
         out = self.dec1(torch.cat([out4, out], dim=1))
@@ -218,6 +199,7 @@ class ResUNet(nn.Module):
 if __name__=="__main__":
     b, c, h, w = 2,1,224,224
     x = torch.randn(b, c, h, w)
-    n = UNet(c, 1)
+    # n = UNet(c, 1)
+    n = ResUNet(c, 1)
     out = n(x)
     torchsummary.summary(n, (c, h, w))

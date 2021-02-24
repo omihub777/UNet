@@ -23,11 +23,26 @@ class UpConvBlock(nn.Module):
         out = F.relu(self.bn(self.conv(x)))
         return out
 
-# class ResBlock(nn.Module):
-#     def __init__(self, in_c, out_c):
-#         super(ResBlock, self).__init__()
-#         self.bn1 = nn.BatchNorm2d(in_c)
-#         self.conv1 = nn.Conv2d()
+class ResBlock(nn.Module):
+    def __init__(self, in_c, out_c, s=2):
+        super(ResBlock, self).__init__()
+        self.bn1 = nn.BatchNorm2d(in_c)
+        self.conv1 = nn.Conv2d(in_c, out_c, kernel_size=3, stride=s, padding=1, bias=False)
+        self.bn2 = nn.BatchNorm2d(out_c)
+        self.conv2 = nn.Conv2d(out_c, out_c, kernel_size=3, stride=1, padding=1, bias=False)
+
+        if in_c!=out_c or s!=1:
+            self.skip = nn.Conv2d(in_c, out_c, kernel_size=1, stride=s, bias=False)
+        else:
+            self.skip = nn.Sequential()
+
+    def forward(self, x):
+        x = F.relu(self.bn1(x))
+        out = self.conv1(x)
+        out = self.conv2(F.relu(self.bn2(out)))
+
+        return out + self.skip(x)
+
 
 if __name__=="__main__":
     x = torch.randn(2,1,32,32)

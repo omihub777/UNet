@@ -6,7 +6,7 @@ import torchvision
 import torchvision.transforms as transforms
 
 from dataset import RealCropDataset
-from model.unet import UNet
+from model.unet import UNet, ResUNet
 from criterions import DiceBCELoss
 
 def get_criterion(args):
@@ -38,6 +38,8 @@ def get_model(args):
     print(f"Model: {args.model_name}")
     if args.model_name=="unet":
         model = UNet(args.in_c, args.out_c, args.filters)
+    elif args.model_name=="resunet":
+        model = ResUNet(args.in_c, args.out_c, args.filters)
     else:
         raise ValueError(f"{args.model_name}?")
     return model

@@ -7,7 +7,7 @@ In this repo, we use `UNet` mainly.
 
 ## TODO
 * From ConvBlock to ResBlock (in bottleneck.)
-    * [DeepResUNet](https://arxiv.org/abs/1711.10684)
+    * Ref:[DeepResUNet](https://arxiv.org/abs/1711.10684)
         * Use pre-act resblock for all blocks.(not only bottleneck)
 * Quantitative Evaluation.(IoU)
 * Dilated Conv?
