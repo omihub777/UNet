@@ -27,6 +27,7 @@ parser.add_argument("--seed", default=42, type=int)
 parser.add_argument("--loss",default="bce", help="mse, bce, dice")
 parser.add_argument("--dice-weight", default=1., type=float)
 parser.add_argument("--filters", default=44, type=int, help="Number of filters in the inital layer.")
+parser.add_argument("--num-workers", default=4, type=int)
 args = parser.parse_args()
 
 args.out_c = 1
