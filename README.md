@@ -6,12 +6,10 @@ In this repo, we use `UNet` mainly.
 
 
 ## TODO
-* Double Check duplciation between train and test data.
-* Add More DAs
-    * Rotation(45)
-    * Color Jitter(Brightness/Contreast/Saturation/Hue)
-    * Gaussian Blur?
-* From ConvBlock to ResBlock in bottleneck.
+* From ConvBlock to ResBlock (in bottleneck.)
+    * [DeepResUNet](https://arxiv.org/abs/1711.10684)
+        * Use pre-act resblock for all blocks.(not only bottleneck)
+* Quantitative Evaluation.(IoU)
 * Dilated Conv?
 * test.py
 
@@ -24,4 +22,15 @@ In this repo, we use `UNet` mainly.
 * Trainer
 * MSELoss
 * BCE+Dice Loss(from [kaggle](https://www.kaggle.com/c/carvana-image-masking-challenge/discussion/40199))
+    * Messed up with Loss values.
+    * BCE-only works well. So, dice loss degrades the performance.
 * Lessen the number of parameters([3rd place solution](https://www.kaggle.com/c/carvana-image-masking-challenge/discussion/40199) uses 8M UNet)
+    * Works well.(not better.)
+* Double Check duplciation between train and test data.
+    * Using diffrent ids b/w train and test data.
+* BCELoss
+    * In the literature, every paper uses bce rather than mse. We stick to this.
+* Add More DAs
+    * Rotation(45)
+    * Color Jitter(Brightness/Contreast/Saturation/Hue)
+    * Gaussian Blur?

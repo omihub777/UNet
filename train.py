@@ -1,9 +1,12 @@
-import comet_ml
 import argparse
-from utils import *
+import math
+
+import comet_ml
 import torch
 import torch.nn as nn
 import numpy as np
+
+from utils import *
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--api-key", required=True)
@@ -12,7 +15,7 @@ parser.add_argument("--model-name", default="unet")
 parser.add_argument("--lr", default=1e-3, type=float)
 parser.add_argument("--batch-size", default=16, type=int)
 parser.add_argument("--eval-batch-size",default=32, type=int)
-parser.add_argument("--max-epochs", default=200, type=int)
+parser.add_argument("--max-steps", default=500, type=int)
 parser.add_argument("--optimizer", default="adam")
 parser.add_argument("--learning-rate", default=1e-3, type=float)
 parser.add_argument("--beta1", default=0.9, type=float)
@@ -23,6 +26,7 @@ parser.add_argument("--size", default=224, type=int)
 parser.add_argument("--seed", default=42, type=int)
 parser.add_argument("--loss",default="dice", help="mse, bce, dice")
 parser.add_argument("--dice-weight", default=1., type=float)
+parser.add_argument("--filters", defualt=44, type=int, help="Number of filters in the inital layer.")
 args = parser.parse_args()
 
 args.out_c = 1
@@ -118,6 +122,8 @@ if __name__=="__main__":
     experiment_name = get_experiment_name(args)
     logger.set_name(experiment_name)
     train_dl, test_dl = get_dataloader(args)
+    epoch_steps = math.floor(len(train_dl.dataset) / args.batch_size)
+    args.max_epochs = math.floor(args.max_steps/epoch_steps)
     trainer = Trainer(args, logger)
     trainer.fit(train_dl, test_dl)
     filename=f"weights/{args.model_name}_last.pth"

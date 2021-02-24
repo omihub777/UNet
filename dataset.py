@@ -1,6 +1,7 @@
 import torch
 import torchvision
 import torchvision.transforms as transforms
+import torchvision.transforms.functional as TF
 from PIL import Image
 
 class RealCropDataset(torch.utils.data.Dataset):
@@ -13,48 +14,55 @@ class RealCropDataset(torch.utils.data.Dataset):
         self.size = size
 
     def _transform(self, image, target):
-        image = transforms.functional.resize(image, size=(self.size, self.size))
-        target = transforms.functional.resize(target, size=(self.size, self.size))
+        image = TF.resize(image, size=(self.size, self.size))
+        target = TF.resize(target, size=(self.size, self.size))
 
         #Pad
-        image = transforms.functional.pad(image, padding=self.size//8)
-        target = transforms.functional.pad(target, padding=self.size//8)
+        image = TF.pad(image, padding=self.size//8)
+        target = TF.pad(target, padding=self.size//8)
 
         #Crop
         i, j, h, w = transforms.RandomCrop.get_params(
             image, output_size=(self.size, self.size)
         )
-        image = transforms.functional.crop(image, i,j,h,w)
-        target = transforms.functional.crop(target, i, j, h, w)
+        image = TF.crop(image, i,j,h,w)
+        target = TF.crop(target, i, j, h, w)
 
         #HFlip
         if torch.rand(1) > 0.5:
-            image = transforms.functional.hflip(image)
-            target = transforms.functional.hflip(target)
+            image = TF.hflip(image)
+            target = TF.hflip(target)
 
         #VFlip
         if torch.rand(1) > 0.5:
-            image = transforms.functional.vflip(image)
-            target = transforms.functional.vflip(target)
+            image = TF.vflip(image)
+            target = TF.vflip(target)
 
         # Rotation(45)
-        # ColorJitter(Brightness/Contrast/Saturation/Hue)
-        # Gaussian Blur(for motion noise or some ill-setting)
+        angle = torch.randint(-45, 45,size=(1))
+        image = TF.rotate(image, angle)
+        target = TF.rotate(target, angle)
         
+        # ColorJitter(Brightness/Contrast/Saturation/Hue)
+        # Only for image!
+        image = transforms.ColorJitter(brightness=.2, contrast=.2, saturation=.2, hue=.1)(image)
+        # Gaussian Blur(for motion noise or some ill-setting)
+        # Only for image!
+        image = transforms.GaussianBlur(kernel_size=3)(image)
+        
+        # Convert to torch.Tensor
+        image = TF.to_tensor(image)
+        target = TF.to_tensor(target)
 
-        image = transforms.functional.to_tensor(image)
-        target = transforms.functional.to_tensor(target)
-        # print(f"==============={target.max()}===================")
-
-        image = transforms.functional.normalize(image, mean=[.5,.5,.5], std=[.5,.5,.5])
-        # target = transforms.functional.normalize(target, mean=[.5], std=[.5])
+        # Normalize image.
+        image = TF.normalize(image, mean=[.5,.5,.5], std=[.5,.5,.5])
 
         return image, target
 
     def _test_transform(self, image):
-        image = transforms.functional.resize(image, size=(self.size, self.size))
-        image = transforms.functional.to_tensor(image)
-        image = transforms.functional.normalize(image, mean=[.5,.5,.5], std=[.5,.5,.5])
+        image = TF.resize(image, size=(self.size, self.size))
+        image = TF.to_tensor(image)
+        image = TF.normalize(image, mean=[.5,.5,.5], std=[.5,.5,.5])
         return image
 
     def __getitem__(self, idx):

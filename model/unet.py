@@ -5,6 +5,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torchsummary
+
 from layers import ConvBlock, UpConvBlock
 
 class VanillaUNet(nn.Module):
@@ -85,9 +86,8 @@ class VanillaUNet(nn.Module):
 
 
 class UNet(nn.Module):
-    def __init__(self, in_c, out_c):
+    def __init__(self, in_c: int, out_c: int , filters: int=44):
         super(UNet, self).__init__()
-        filters = 44
         self.enc1 = nn.Sequential(
             ConvBlock(in_c, filters, p=1),
             ConvBlock(filters, filters, p=1),
