@@ -5,6 +5,8 @@ weights/*
 !weights/.gitkeep
 !data/.gitkeep
 *.ipynb
+annotation.md
+annotation.pdf
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

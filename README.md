@@ -1,6 +1,6 @@
 # UNet
 
-Re-implementation of U-Net[[Ronneberger, O(MICCAI15)]](https://arxiv.org/abs/1505.04597) in PyTorch.
+Re-implementation of U-Net[[Ronneberger, O.(MICCAI15)]](https://arxiv.org/abs/1505.04597) in PyTorch.
 In `unet.py`, while `UNetVannila` follows the paper's architecture(i.e. convolution layers don't have padding.), `UNet` has convolutions which use padding.
 In this repo, we use `UNet` mainly.
 
@@ -9,10 +9,8 @@ In this repo, we use `UNet` mainly.
 * Tackle with "Shaded White removing problem"
     * Can't identify shaded white parts of items.
     * Higher Brightness degree?
-* Quantitative Evaluation.(Dice)
 * Dilated Conv?
 * test.py
-* Add Random Grayscale to catch the shape of the objects
 
 ## Done
 * get_dataset
@@ -38,3 +36,6 @@ In this repo, we use `UNet` mainly.
 * From ConvBlock to ResBlock (in bottleneck.)
     * Ref:[DeepResUNet](https://arxiv.org/abs/1711.10684)
         * Use pre-act resblock for all blocks.(not only bottleneck)
+* Add Random Grayscale to catch the shape of the objects
+    * Not good...?
+* Quantitative Evaluation.(Dice)
