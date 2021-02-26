@@ -7,6 +7,7 @@ import torch.nn as nn
 import numpy as np
 
 from utils import *
+from metrics import dice_fn
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--api-key", required=True)
@@ -52,27 +53,41 @@ class Trainer:
         self.criterion = get_criterion(args)
         self.optimizer = get_optimizer(args, self.model)
 
-    def fit(self, train_dl, test_dl):
+    def fit(self, train_dl, val_dl, test_dl):
         step = 0
         for epoch in range(1, self.args.max_epochs+1):
-            epoch_loss, num_imgs = 0., 0.
+            epoch_loss, epoch_dice, num_imgs = 0., 0., 0.
             self.model.train()
             for image, target in train_dl:
                 step+=1
                 num_imgs += image.size(0)
-                loss = self.trian_step(self.model, image, target, step)
-                epoch_loss += loss
+                loss, dice = self.trian_step(self.model, image, target, step)
+                epoch_loss += loss*image.size(0)
+                epoch_dice += dice*image.size(0)
                 if self.args.dry_run:
                     grid_image = torchvision.utils.make_grid(image.cpu(), nrow=4)
                     self.logger.log_image(grid_image.permute(1,2,0), step=step, name="Train") 
                     grid_target = torchvision.utils.make_grid(target.cpu(), nrow=4)
                     self.logger.log_image(grid_target.permute(1,2,0), step=step, name="TrainTarget") 
                     break
-
-            # import IPython; IPython.embed(); exit(1)
             epoch_loss /= num_imgs
+            epoch_dice /= num_imgs
             logger.log_metric("loss", epoch_loss, step=step)
+            logger.log_metric("dice", epoch_dice, step=step)
+
+
             self.model.eval()
+            val_loss, val_dice, val_imgs = 0., 0., 0.
+            for image, target in val_dl:
+                val_imgs += image.size(0)
+                loss, dice = self.val_step(self.model, image, target)
+                val_loss += loss*image.size(0)
+                val_dice += dice*image.size(0)
+            val_loss /= val_imgs
+            val_dice /= val_imgs
+            logger.log_metric("val_loss", val_loss, step=step)
+            logger.log_metric("val_dice", val_dice, step=step)
+
             for i, image in enumerate(test_dl):
                 if i>=1:
                     break
@@ -93,9 +108,20 @@ class Trainer:
         scaler.scale(loss).backward()
         scaler.step(self.optimizer)
         scaler.update()
-
+        dice = dice_fn(out, target)
         self.logger.log_metric("batch_train_loss", loss, step=step)
-        return loss
+        self.logger.log_metric("batch_train_dice", dice, step=step)
+        return loss, dice
+
+    @torch.no_grad()
+    def val_step(self, model, image, target):
+        self.optimizer.zero_grad()
+        image, target = image.to(self.device), target.to(self.device)
+        with torch.cuda.amp.autocast():
+            out = model(image)
+            loss = self.criterion(out, target)
+        dice = dice_fn(out, target)
+        return loss, dice
 
     @torch.no_grad()
     def test_step(self, model, image, step):
@@ -117,6 +143,7 @@ class Trainer:
         grid_hardresult = torchvision.utils.make_grid(hardresult.detach().cpu(), nrow=4)
         self.logger.log_image(grid_softresult.permute(1,2,0), step=step, name="SoftResult")
         self.logger.log_image(grid_hardresult.permute(1,2,0), step=step, name="HardResult")
+
 if __name__=="__main__":
     logger = comet_ml.Experiment(
         api_key=args.api_key,
@@ -125,12 +152,12 @@ if __name__=="__main__":
     args.api_key = None
     experiment_name = get_experiment_name(args)
     logger.set_name(experiment_name)
-    train_dl, test_dl = get_dataloader(args)
+    train_dl, val_dl, test_dl = get_dataloader(args)
     epoch_steps = math.floor(len(train_dl.dataset) / args.batch_size)
     args.max_epochs = math.floor(args.max_steps/epoch_steps)
     trainer = Trainer(args, logger)
     logger.log_parameters(vars(args))
-    trainer.fit(train_dl, test_dl)
+    trainer.fit(train_dl, val_dl, test_dl)
     filename=f"weights/{args.model_name}_last.pth"
     torch.save(trainer.model.state_dict(), f=filename)
     logger.log_asset(filename, filename.split("/")[-1])

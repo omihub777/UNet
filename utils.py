@@ -22,17 +22,21 @@ def get_criterion(args):
     return criterion
 
 def get_dataloader(args):
-    train_ds, test_ds = get_dataset(args)
+    train_ds, val_ds, test_ds = get_dataset(args)
     train_dl = torch.utils.data.DataLoader(train_ds, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers, pin_memory=True)
+    val_dl = torch.utils.data.DataLoader(val_ds, batch_size=args.eval_batch_size, num_workers=args.num_workers, pin_memory=True)
     test_dl = torch.utils.data.DataLoader(test_ds, batch_size=args.eval_batch_size, shuffle=True, num_workers=args.num_workers, pin_memory=True)
-    return train_dl, test_dl
+    return train_dl, val_dl,  test_dl
 
 def get_dataset(args):
     train_path = glob.glob("data/train/*.jpg")
+    val_path = glob.glob("data/val/*.jpg")
     test_path = glob.glob("data/test/*.jpg")
-    train_ds = RealCropDataset(train_path, train=True, size=args.size)
-    test_ds = RealCropDataset(test_path, train=False, size=args.size)
-    return train_ds, test_ds
+
+    train_ds = RealCropDataset(train_path, split='train', size=args.size)
+    val_ds = RealCropDataset(val_path, split='val', size=args.size)
+    test_ds = RealCropDataset(test_path, split='test', size=args.size)
+    return train_ds, val_ds, test_ds
 
 def get_model(args):
     print(f"Model: {args.model_name}")

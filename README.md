@@ -9,7 +9,7 @@ In this repo, we use `UNet` mainly.
 * Tackle with "Shaded White removing problem"
     * Can't identify shaded white parts of items.
     * Higher Brightness degree?
-* Quantitative Evaluation.(IoU)
+* Quantitative Evaluation.(Dice)
 * Dilated Conv?
 * test.py
 * Add Random Grayscale to catch the shape of the objects
