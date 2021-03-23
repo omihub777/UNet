@@ -44,15 +44,9 @@ def get_dataset(args):
     val_ds = RealCropDataset(val_path, split='val', size=args.size)
     test_ds = RealCropDataset(test_path, split='test', size=args.size)
     return train_ds, val_ds, test_ds
+        # image = TF.resize(image, size=(self.size, self.size))
+        # target = TF.resize(target, size=(self.size, self.size))
 
-def get_model(args):
-    print(f"Model: {args.model_name}")
-    if args.model_name=="unet":
-        model = UNet(args.in_c, args.out_c, args.filters)
-    elif args.model_name=="resunet":
-        model = ResUNet(args.in_c, args.out_c, args.filters)
-    else:
-        raise ValueError(f"{args.model_name}?")
     return model
 
 def get_optimizer(args, model):
@@ -77,5 +71,6 @@ if __name__=="__main__":
     args.eval_batch_size = 16
     args.num_workers=1
     train_dl,val_dl, test_dl = get_dataloader(args)
-    image, target = next(iter(train_dl))
+    # image, target = next(iter(train_dl))
+    image, target = next(iter(val_dl))
     print(image.shape, target.shape)

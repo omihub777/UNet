@@ -23,10 +23,9 @@ class RealCropDataset(torch.utils.data.Dataset):
         self.size = size
 
     def _transform(self, image, target):
+        image = TF.resize(image, size=(self.size, self.size))
+        target = TF.resize(target, size=(self.size, self.size))
         if self.split=="train":
-            image = TF.resize(image, size=(self.size, self.size))
-            target = TF.resize(target, size=(self.size, self.size))
-
             #Pad
             image = TF.pad(image, padding=self.size//8)
             target = TF.pad(target, padding=self.size//8)
