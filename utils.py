@@ -29,9 +29,16 @@ def get_dataloader(args):
     return train_dl, val_dl,  test_dl
 
 def get_dataset(args):
-    train_path = glob.glob("data/train/*.jpg")
-    val_path = glob.glob("data/val/*.jpg")
-    test_path = glob.glob("data/test/*.jpg")
+    ### Old Path
+    # train_path = glob.glob("data/train/*.jpg")
+    # val_path = glob.glob("data/val/*.jpg")
+    # test_path = glob.glob("data/test/*.jpg")
+
+
+    ### New Path
+    train_path = glob.glob("data/new_train/*/*.jpg")
+    val_path = glob.glob("data/new_val/*/*.jpg")
+    test_path = glob.glob("data/new_test/*/*.jpg")
 
     train_ds = RealCropDataset(train_path, split='train', size=args.size)
     val_ds = RealCropDataset(val_path, split='val', size=args.size)
@@ -68,6 +75,7 @@ if __name__=="__main__":
     args.size = 224
     args.batch_size = 16
     args.eval_batch_size = 16
-    train_dl, test_dl = get_dataloader(args)
+    args.num_workers=1
+    train_dl,val_dl, test_dl = get_dataloader(args)
     image, target = next(iter(train_dl))
     print(image.shape, target.shape)

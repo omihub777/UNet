@@ -11,7 +11,15 @@ class RealCropDataset(torch.utils.data.Dataset):
         self.img_path = img_path
         self.split = split
         if self.split == 'train' or self.split=='val':
-            self.target_path = [img_p.replace(self.split,"target").replace("jpg","png") for img_p in self.img_path]
+            ### Old
+            # self.target_path = [img_p.replace(self.split,"target").replace("jpg","png") for img_p in self.img_path]
+            ### New
+            self.target_path = []
+            for img_p in self.img_path:
+                target_p = img_p.replace(f"new_{self.split}", "new_target")
+                last = target_p.split("/")[-1]
+                target_p = target_p.replace(last, f"m_{last}") # target names start with "m_"
+                self.target_path.append(target_p)
         self.size = size
 
     def _transform(self, image, target):
